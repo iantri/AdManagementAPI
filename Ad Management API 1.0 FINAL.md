@@ -67,8 +67,10 @@ Jennifer Derke, Director of Product, Programmatic & Data, IAB Tech Lab
 - [Authentication](#authentication)
 - [Resource Representations](#resourcerepresentations)
   - [Collection Of Ads](#collectionofads)
+  - [Collection Of Seats](#collectionofseats)
   - [Ad](#ad)
   - [Audit](#audit)
+  - [Seat](#seat)
 - [Webhooks](#webhooks)
   - [Registration and Authentication](#webhookauthentication)
   - [Webhook Calls](#webhookcalls)
@@ -257,7 +259,7 @@ For example:  <br />
 
 `/ads?auditStart=1528221114000`
 
-
+<br />
 <strong>POST:</strong> submits a single ad. The body must contain a only an Ad object (and its children). Returns a collection of ads containing the ad submitted, including any fields or child objects provided by the exchange. This response may be sparse at the exchange's discretion (see "API conventions").</td>
   </tr>
   <tr>
@@ -266,6 +268,34 @@ For example:  <br />
     <td><strong>GET:</strong> Returns a collection of ads resource containing a single ad in its entirety. <br />
 <strong>PUT:</strong> replaces the ad object in its' entirety, and returns a collection of ads containing the specified ad, including any fields or child objects provided by the exchange. This response may be sparse at the exchange's discretion (see "API conventions"). <br />
 <strong>PATCH:</strong> replaces only the specified fields, and returns a collection of ads containing the specified ad, including any fields or child objects provided by the exchange. This response may be sparse at the exchange's discretion (see "API conventions").</td>
+  </tr>
+    <tr>
+    <td>{baseUrl}/bidder/{bidderId}/seats</td>
+    <td>GET, POST</td>
+    <td><strong>GET:</strong> returns a collection of seats for a given bidder. This response may be sparse at the exchange's discretion (see "API conventions"). <br />
+
+An "auditStart" filter, at a minimum, must be set on the query string to constrain the number of seats returned, else exchanges may choose to return a 400 status code. Exchanges may limit the number of seats in the returned collection at their discretion. If the result set is a subset of available seats, this will be indicated in the result (see "Collection of seats"). Bidders may fetch the remaining seats by examining the last modification date of the Audit object of the final seat in the collection (the most recently updated seat) and use this as the "auditStart" filter for a subsequent request, repeating until the bidder has gathered all updates. <br />
+
+The available filters are: <br />
+
+**auditStart:** Beginning timestamp for the "lastmod" value from the Audit object of returned seats (timestamp greater than this value). (Required) <br />
+**auditEnd:** Ending timestamp for the "lastmod" value from the Audit object of returned seats (timestamp less than or equal to this value). (Optional, now is assumed if omitted) <br />
+
+See "API conventions" regarding date format. <br />
+
+For example:  <br />
+
+`/ads?auditStart=1528221114000`
+
+<br />
+<strong>POST:</strong> submits a single seat. The body must contain a only a Seat object. Returns a collection of seats containing the seat submitted, including any fields or child objects provided by the exchange. This response may be sparse at the exchange's discretion (see "API conventions").</td>
+  </tr>
+  <tr>
+    <td>{baseUrl}/bidder/{bidderId}/seats/{id}</td>
+    <td>GET, PUT, PATCH</td>
+    <td><strong>GET:</strong> Returns a collection of seats resource containing a single seat in its entirety. <br />
+<strong>PUT:</strong> replaces the seat object in its' entirety, and returns a collection of seats containing the specified seat, including any fields or child objects provided by the exchange. This response may be sparse at the exchange's discretion (see "API conventions"). <br />
+<strong>PATCH:</strong> replaces only the specified fields, and returns a collection of seats containing the specified seat, including any fields or child objects provided by the exchange. This response may be sparse at the exchange's discretion (see "API conventions").</td>
   </tr>
 </table>
 
@@ -306,6 +336,32 @@ A collection of ads is an object containing one or more ads with additional meta
   </tr>
 </table>
 
+## Collection Of Seats <a name="collectionofseats"></a>
+
+A collection of seats is an object containing one or more seats with additional metadata.
+
+<table>
+  <tr>
+    <th>Attribute</th>
+    <th>Type</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>count</td>
+    <td>integer</td>
+    <td>The number of seats in this collection. </td>
+  </tr>
+  <tr>
+    <td>more</td>
+    <td>integer</td>
+    <td>A boolean flag indicating that this collection is a subset; the number of seats returned has been limited by exchange policy. See "Endpoints" above. May be omitted when not needed.</td>
+  </tr>
+  <tr>
+    <td>ads</td>
+    <td>object array</td>
+    <td>An array of ad resources. On GET, sorted by oldest to newest date of "lastmod" from the Audit object.</td>
+  </tr>
+</table>
 
 ## Ad <a name="ad"></a>
 
@@ -318,6 +374,18 @@ Only the bidder may modify the ad object and its' children, excepting the Audit 
 * "init": Set by the exchange on initial submission of the ad
 
 * "lastmod": Set by the exchange on the most recently modification to the ad
+
+## Seat <a name="seat"></a>
+
+A seat resource is an object representing each unique seat that will be used by the bidder. It is a AdCOM 1.x seat object with relevant child objects. See the [AdCOM specification](https://github.com/InteractiveAdvertisingBureau/AdCOM) for details.
+
+Only the bidder may modify the seat object and its' children, excepting the Audit object and these fields from the Seat object:
+
+* "id": Set by the exchange (only for exchanges who express seats in terms of their IDs)
+
+* "init": Set by the exchange on initial submission of the seat
+
+* "lastmod": Set by the exchange on the most recently modification to the seat
 
 ## Audit <a name="audit"></a>
 
