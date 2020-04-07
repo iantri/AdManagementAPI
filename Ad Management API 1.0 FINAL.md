@@ -221,6 +221,10 @@ AdCOM objects returned in responses may contain a sparse fieldset to save bandwi
     * id
     * init (initial ad creation only)
     * lastmod
+* Seat object
+    * id
+    * init (initial seat creation only)
+    * lastmod
 * Audit object
     * status
     * lastmod
@@ -357,9 +361,9 @@ A collection of seats is an object containing one or more seats with additional 
     <td>A boolean flag indicating that this collection is a subset; the number of seats returned has been limited by exchange policy. See "Endpoints" above. May be omitted when not needed.</td>
   </tr>
   <tr>
-    <td>ads</td>
+    <td>seats</td>
     <td>object array</td>
-    <td>An array of ad resources. On GET, sorted by oldest to newest date of "lastmod" from the Audit object.</td>
+    <td>An array of seat resources. On GET, sorted by oldest to newest date of "lastmod" from the Audit object.</td>
   </tr>
 </table>
 
